@@ -7,7 +7,7 @@
     <ProjectGuid>{3A323615-9AD3-4BA5-A9A2-46FC7C9F905B}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Poisonous Daddy</RootNamespace>
+    <RootNamespace>VenomancerWardControl</RootNamespace>
     <AssemblyName>Poisonous Daddy</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
