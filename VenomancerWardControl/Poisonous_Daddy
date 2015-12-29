@@ -7,8 +7,8 @@
     <ProjectGuid>{3A323615-9AD3-4BA5-A9A2-46FC7C9F905B}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Poisonous Daddy</RootNamespace>
-    <AssemblyName>Poisonous Daddy</AssemblyName>
+    <RootNamespace>PoisonousDaddy</RootNamespace>
+    <AssemblyName>PoisonousDaddy</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
