@@ -9,7 +9,7 @@ using System.Windows.Input;
 
 
 
-namespace Poisonous_Daddy
+namespace VenomancerWardControl
 {
     internal class Program
     {
