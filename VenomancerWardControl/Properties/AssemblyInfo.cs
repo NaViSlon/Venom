@@ -1,15 +1,15 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("VenomancerWardControl")]
-[assembly: AssemblyDescription("Last hit enemy Creeps | Denies ally creeps | Debuffs enemy with poison | Denies other Plague Ward(s)")]
+[assembly: AssemblyTitle("Poisonous Daddy")]
+[assembly: AssemblyDescription("Last hit enemy Creeps | Denies ally creeps | haras enemy heroes")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("EnsageSharp")]
-[assembly: AssemblyProduct("VenomancerWardControl")]
+[assembly: AssemblyProduct("Poisonous Daddy")]
 [assembly: AssemblyCopyright("Copyright © edwynxero 2015")]
 [assembly: AssemblyTrademark("EnsageSharp")]
 [assembly: AssemblyCulture("")]
