@@ -1,79 +1,118 @@
-﻿using System;
-using System.Linq;
 using Ensage;
 using Ensage.Common;
 using Ensage.Common.Extensions;
 using SharpDX;
+using System;
+using System.Linq;
+using System.Windows.Input;
 
-namespace VenomancerWardControl
+
+
+
+namespace Poisonous_Daddy
 {
     internal class Program
     {
+        #region
+
         private static readonly uint[] PlagueWardDamage = { 10, 19, 29, 38 };
         private static void Main()
         {
             Game.OnUpdate += Game_OnUpdate;
+            
         }
 
         private static void Game_OnUpdate(EventArgs args)
         {
-            if (!Game.IsInGame || !Utils.SleepCheck("VenomancerWardControl"))
-                return;
-            Utils.Sleep(125, "VenomancerWardControl");
-
             var me = ObjectMgr.LocalHero;
-            if (me == null || me.ClassID != ClassID.CDOTA_Unit_Hero_Venomancer)
+
+            if (!Game.IsInGame && me == null)
                 return;
 
-            var plagueWardLevel = me.FindSpell("venomancer_plague_ward").Level - 1;
-
-            var enemies = ObjectMgr.GetEntities<Hero>().Where(hero => hero.IsAlive && !hero.IsIllusion && hero.IsVisible && hero.Team == me.GetEnemyTeam()).ToList();
-            var creeps = ObjectMgr.GetEntities<Creep>().Where(creep => (creep.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane || creep.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege) && creep.IsAlive && creep.IsVisible && creep.IsSpawned).ToList();
-            var plaguewards = ObjectMgr.GetEntities<Unit>().Where(unit => unit.ClassID == ClassID.CDOTA_BaseNPC_Venomancer_PlagueWard && unit.IsAlive && unit.IsVisible).ToList();
-
-            if (!enemies.Any() || !creeps.Any() || !plaguewards.Any() || !(plagueWardLevel > 0))
+            if (me.ClassID != ClassID.CDOTA_Unit_Hero_Venomancer)
                 return;
 
+            var Level = me.Spellbook.SpellE.Level - 1;
+            var enemies = ObjectMgr.GetEntities<Hero>().Where(hero => hero.IsAlive && !hero.IsIllusion && hero.IsVisible && hero.Team != me.Team).ToList();
+            var creeps = ObjectMgr.GetEntities<Creep>().Where(creep => (creep.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane || creep.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege) && creep.IsAlive && creep.IsVisible && creep.IsSpawned && creep.Health <= ((int)PlagueWardDamage[Level] * (1 - creep.DamageResist) + 30)).ToList();
+            var wards = ObjectMgr.GetEntities<Unit>().Where(unit => unit.ClassID == ClassID.CDOTA_BaseNPC_Venomancer_PlagueWard && unit.IsAlive && unit.CanAttack()).ToList();
+            var notarget = ObjectMgr.GetEntities<Creep>().Where(creep => (creep.ClassID == ClassID.CDOTA_BaseNPC_Creep_Lane || creep.ClassID == ClassID.CDOTA_BaseNPC_Creep_Siege) && creep.IsAlive && creep.IsVisible && creep.IsSpawned && creep.Health > ((int)PlagueWardDamage[Level] * (1 - creep.DamageResist) + 30)).ToList();
+
+            if (!enemies.Any() || !creeps.Any() || !wards.Any() || !(Level > 0))
+                return;
+        #endregion
+
+        #region enemy
             foreach (var enemy in enemies)
             {
-                if (enemy.Modifiers.FirstOrDefault(modifier => modifier.Name == "modifier_venomancer_poison_sting_ward") == null && enemy.Health > 0)
+                if (enemy.Health > 0)
                 {
-                    foreach (var plagueward in plaguewards)
+                    foreach (var v in wards)
                     {
-                        if (GetDistance2D(enemy.Position, plagueward.Position) < plagueward.AttackRange && Utils.SleepCheck(plagueward.Handle.ToString()))
+                        if (GetDistance2D(enemy.Position, v.Position) < v.AttackRange && Utils.SleepCheck(v.Handle.ToString()))
                         {
-                            plagueward.Attack(enemy);
-                            Utils.Sleep(1000, plagueward.Handle.ToString());
+                            v.Attack(enemy.Player.Hero);
+                            Utils.Sleep(200, v.Handle.ToString());
                         }
                     }
                 }
             }
+            #endregion 
 
+        #region creeps
             foreach (var creep in creeps)
             {
-                if (creep.Team == me.GetEnemyTeam() && creep.Health > 0 && creep.Health < (PlagueWardDamage[plagueWardLevel] * (1 - creep.DamageResist) + 20))
-                    foreach (var plagueward in plaguewards)
-                    {
-                        if (GetDistance2D(creep.Position, plagueward.Position) < plagueward.AttackRange && Utils.SleepCheck(plagueward.Handle.ToString()))
+                foreach (var v in wards)
+                {
+                    
+                        #region enemycreeps
+                        if (creep.Team != me.Team && creep.Health <= (PlagueWardDamage[Level] * (1 - creep.DamageResist) + 30)
+                                && GetDistance2D(creep.Position, v.Position) < v.AttackRange)
                         {
-                            plagueward.Attack(creep);
-                            Utils.Sleep(1000, plagueward.Handle.ToString());
+
+                            if (GetDistance2D(creep.Position, v.Position) < v.AttackRange && Utils.SleepCheck(v.Handle.ToString()))
+                            {
+                                v.Attack(creep);
+                                Utils.Sleep(1000, v.Handle.ToString());
+                            }
+                        }
+                    
+                    #endregion
+
+                        #region mycreeps
+                        if (creep.Team == me.Team && creep.Health <= (PlagueWardDamage[Level] * (1 - creep.DamageResist) + 30))
+                    {
+                        if (GetDistance2D(creep.Position, v.Position) < v.AttackRange && Utils.SleepCheck(v.Handle.ToString()))
+                        {
+                            v.Attack(creep);
+                            Utils.Sleep(1000, v.Handle.ToString());
                         }
                     }
-                else if (creep.Team == me.Team && creep.Health > (PlagueWardDamage[plagueWardLevel] * (1 - creep.DamageResist)) && creep.Health < (PlagueWardDamage[plagueWardLevel] * (1 - creep.DamageResist) + 88))
-                    foreach (var plagueward in plaguewards)
-                    {
-                        if (GetDistance2D(creep.Position, plagueward.Position) < plagueward.AttackRange && Utils.SleepCheck(plagueward.Handle.ToString()))
+                        #endregion
+
+                        #region notarget
+                        foreach (var t in notarget)
                         {
-                            plagueward.Attack(creep);
-                            Utils.Sleep(1000, plagueward.Handle.ToString());
+                            if (GetDistance2D(t.Position, v.Position) < v.AttackRange && Utils.SleepCheck(v.Handle.ToString()))
+                            {
+                                //v.Stop();
+								v.Hold();
+                                Utils.Sleep(100, v.Handle.ToString());
+                            }
                         }
-                    }
+                    #endregion
+                }
+
             }
+#endregion
         }
+                
+            
+       
         private static float GetDistance2D(Vector3 p1, Vector3 p2)
         {
             return (float)Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2));
         }
+        
     }
 }
